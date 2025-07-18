@@ -1,4 +1,5 @@
 using EasyRiroSchool.API;
+using EasyRiroSchool.API.Exceptions;
 using EasyRiroSchool.Models;
 using EasyRiroSchool.Models.Deserialization;
 

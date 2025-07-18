@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using EasyRiroSchool.API;
+using EasyRiroSchool.API.Exceptions;
 using HtmlAgilityPack;
 
 namespace EasyRiroSchool.Models.Deserialization;

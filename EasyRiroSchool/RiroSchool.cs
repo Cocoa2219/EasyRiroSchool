@@ -1,6 +1,7 @@
 ﻿using System.Net.Http.Headers;
 using System.Reflection;
 using System.Text.Json;
+using EasyRiroSchool.API.Exceptions;
 using EasyRiroSchool.Deserialization;
 using EasyRiroSchool.Models;
 using EasyRiroSchool.Models.Authentication;
