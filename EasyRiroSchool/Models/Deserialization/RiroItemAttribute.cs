@@ -1,4 +1,4 @@
-﻿namespace EasyRiroSchool.API.Models.Deserialization;
+﻿namespace EasyRiroSchool.Models.Deserialization;
 
 /// <summary>
 /// Attribute to mark a class as a Riro item with a specific path.

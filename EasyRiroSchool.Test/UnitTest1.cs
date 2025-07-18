@@ -1,5 +1,6 @@
 using EasyRiroSchool.API;
-using EasyRiroSchool.API.Models;
+using EasyRiroSchool.Models;
+using EasyRiroSchool.Models.Deserialization;
 
 namespace EasyRiroSchool.Test;
 

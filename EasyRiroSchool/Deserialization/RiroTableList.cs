@@ -1,9 +1,9 @@
 ﻿using System.Collections;
 using System.Reflection;
-using EasyRiroSchool.API.Models.Deserialization;
+using EasyRiroSchool.Models.Deserialization;
 using HtmlAgilityPack;
 
-namespace EasyRiroSchool.API.Deserialization;
+namespace EasyRiroSchool.Deserialization;
 
 /// <summary>
 /// Represents a list of table items deserialized from an HTML table.

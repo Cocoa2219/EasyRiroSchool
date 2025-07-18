@@ -1,4 +1,4 @@
-﻿namespace EasyRiroSchool.API.Models;
+﻿namespace EasyRiroSchool.Models;
 
 /// <summary>
 /// Enumeration representing various database IDs used in the EasyRiroSchool API.

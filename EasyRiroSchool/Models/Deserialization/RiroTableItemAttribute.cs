@@ -1,4 +1,4 @@
-﻿namespace EasyRiroSchool.API.Models.Deserialization;
+﻿namespace EasyRiroSchool.Models.Deserialization;
 
 /// <summary>
 /// Attribute to mark a property as a Riro table item with a specific index.

@@ -1,10 +1,10 @@
 ﻿using System.Net.Http.Headers;
 using System.Reflection;
 using System.Text.Json;
-using EasyRiroSchool.API.Deserialization;
-using EasyRiroSchool.API.Models;
-using EasyRiroSchool.API.Models.Authentication;
-using EasyRiroSchool.API.Models.Deserialization;
+using EasyRiroSchool.Deserialization;
+using EasyRiroSchool.Models;
+using EasyRiroSchool.Models.Authentication;
+using EasyRiroSchool.Models.Deserialization;
 using HtmlAgilityPack;
 
 namespace EasyRiroSchool.API;

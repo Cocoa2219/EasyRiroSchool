@@ -1,4 +1,4 @@
-﻿namespace EasyRiroSchool.API.Models;
+﻿namespace EasyRiroSchool.Models;
 
 /// <summary>
 /// Represents information about a database item.

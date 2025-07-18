@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace EasyRiroSchool.API.Models.Authentication;
+namespace EasyRiroSchool.Models.Authentication;
 
 internal class LoginResponse
 {
