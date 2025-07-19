@@ -6,6 +6,7 @@ using EasyRiroSchool.Deserialization;
 using EasyRiroSchool.Models;
 using EasyRiroSchool.Models.Authentication;
 using EasyRiroSchool.Models.Deserialization;
+using EasyRiroSchool.Models.Deserialization.Items;
 using HtmlAgilityPack;
 
 namespace EasyRiroSchool.API;
@@ -105,7 +106,6 @@ public class RiroSchool
 
         var path = itemAttribute.Path;
 
-        // TODO: Implement pagination and category handling
         var list = new RiroTableList<T>();
         var iterations = info.Count / 20 + (info.Count % 20 > 0 ? 1 : 0);
 

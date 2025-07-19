@@ -1,9 +1,8 @@
 ﻿using System.Text;
-using EasyRiroSchool.API;
 using EasyRiroSchool.API.Exceptions;
 using HtmlAgilityPack;
 
-namespace EasyRiroSchool.Models.Deserialization;
+namespace EasyRiroSchool.Models.Deserialization.Items;
 
 /// <summary>
 /// Represents a portfolio item in the Riro system.

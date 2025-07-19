@@ -1,8 +1,8 @@
 using EasyRiroSchool.API;
 using EasyRiroSchool.API.Exceptions;
-using EasyRiroSchool.API.Models.Deserialization;
 using EasyRiroSchool.Models;
 using EasyRiroSchool.Models.Deserialization;
+using EasyRiroSchool.Models.Deserialization.Items;
 
 namespace EasyRiroSchool.Test;
 

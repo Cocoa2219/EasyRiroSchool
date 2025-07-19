@@ -1,7 +1,6 @@
-﻿using EasyRiroSchool.Models.Deserialization;
-using HtmlAgilityPack;
+﻿using HtmlAgilityPack;
 
-namespace EasyRiroSchool.API.Models.Deserialization;
+namespace EasyRiroSchool.Models.Deserialization.Items;
 
 [RiroItem("board_msg")]
 public class BoardItem : RiroItem

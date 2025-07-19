@@ -1,4 +1,4 @@
-﻿namespace EasyRiroSchool.Models.Deserialization;
+﻿namespace EasyRiroSchool.Models.Deserialization.Items;
 
 /// <summary>
 /// Base class for Riro items.
