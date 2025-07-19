@@ -1,9 +1,10 @@
-﻿using HtmlAgilityPack;
+﻿using System.Text.RegularExpressions;
+using HtmlAgilityPack;
 
 namespace EasyRiroSchool.Models.Deserialization.Items;
 
 [RiroItem("board_msg")]
-public class BoardItem : RiroItem
+public partial class BoardItem : RiroItem
 {
     [RiroTableItem(0)]
     public int Id { get; internal set; }
@@ -53,6 +54,43 @@ public class BoardItem : RiroItem
     public object GetTitle(HtmlNode node) =>
         node.SelectSingleNode("./a")?.InnerText.Trim() ?? "Title not found";
 
+    [RiroTableItem(3)]
+    public VoteCount? Vote { get; internal set; }
+    public object GetVote(HtmlNode node)
+    {
+        var title = node.SelectSingleNode("./a")?.InnerText.Trim();
+
+        if (string.IsNullOrEmpty(title))
+            return null!;
+
+        var match = VoteRegex().Match(title);
+
+        if (match.Success)
+        {
+            var voted = int.Parse(match.Groups[1].Value);
+            int? total = match.Groups[2].Success ? int.Parse(match.Groups[2].Value) : null;
+
+            return new VoteCount
+            {
+                Voted = voted,
+                Total = total
+            };
+        }
+
+        return null!;
+    }
+
+    public class VoteCount
+    {
+        public int Voted { get; set; }
+        public int? Total { get; set; }
+    }
+
+    [RiroTableItem(3)]
+    public bool HasVoted { get; internal set; }
+    public object GetHasVoted(HtmlNode node) =>
+        node.SelectSingleNode("./a")?.SelectSingleNode("./img") != null;
+
     [RiroTableItem(4)]
     public bool HasAttachment { get; internal set; }
     public object GetHasAttachment(HtmlNode node) =>
@@ -77,4 +115,7 @@ public class BoardItem : RiroItem
     {
         return $"BoardItem(Id: {Id}, ItemType: {Type}, Target: {Target}, Title: {Title}, HasAttachment: {HasAttachment}, Author: {Author}, Views: {Views}, CreatedAt: {CreatedAt})";
     }
+
+    [GeneratedRegex(@"\[(\d+)(?:/(\d+))?\]")]
+    private static partial Regex VoteRegex();
 }
