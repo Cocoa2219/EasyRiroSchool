@@ -1,5 +1,6 @@
 using EasyRiroSchool.API;
 using EasyRiroSchool.API.Exceptions;
+using EasyRiroSchool.API.Models.Deserialization;
 using EasyRiroSchool.Models;
 using EasyRiroSchool.Models.Deserialization;
 
@@ -77,6 +78,39 @@ public class LoginTests
         catch (RiroApiException e)
         {
             Assert.Fail("Failed to retrieve portfolio: " + e.Message);
+        }
+    }
+
+    [Test]
+    public async Task GetBoard()
+    {
+        var riroschool = new RiroSchool();
+
+        try
+        {
+            await riroschool.LoginAsync("cocoa.2324a@gmail.com", "cocoa2219!");
+
+            Assert.That(riroschool.Token, Is.Not.Empty, "Token should not be empty after login.");
+            Console.WriteLine($"Login successful. Token: {riroschool.Token}");
+        }
+        catch (Exception e)
+        {
+            Assert.Fail("Login failed: " + e.Message);
+        }
+
+        try
+        {
+            var boardList = await riroschool.GetTableAsync<BoardItem>(new DbInfo(DbId.Announcement, count: 41));
+            Assert.That(boardList, Is.Not.Null, "Board should not be null.");
+
+            foreach (var item in boardList)
+            {
+                Console.WriteLine(item.ToString());
+            }
+        }
+        catch (RiroApiException e)
+        {
+            Assert.Fail("Failed to retrieve board: " + e.Message);
         }
     }
 }

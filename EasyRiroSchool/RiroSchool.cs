@@ -106,31 +106,37 @@ public class RiroSchool
         var path = itemAttribute.Path;
 
         // TODO: Implement pagination and category handling
-        var message = new HttpRequestMessage(HttpMethod.Get,
-            $"{path}.php?db=" + (int)info.Id + "&cate=" + info.Category + "&t_doc=" + info.Category);
-        message.Headers.Add("Cookie", "cookie_token=" + Token);
+        var list = new RiroTableList<T>();
+        var iterations = info.Count / 20 + (info.Count % 20 > 0 ? 1 : 0);
 
-        Console.WriteLine($"Requesting table: {path}.php?db={(int)info.Id}&cate={info.Category}&t_doc={info.Category}");
+        for (var i = 0; i < iterations; i++)
+        {
+            var message = new HttpRequestMessage(HttpMethod.Get,
+                $"{path}.php?db=" + (int)info.Id + "&cate=" + info.Category + "&t_doc=" + info.Category + $"&page={i + 1}");
+            message.Headers.Add("Cookie", "cookie_token=" + Token);
 
-        var response = await _client.SendAsync(message);
-        if (!response.IsSuccessStatusCode)
-            throw new RiroApiException("Failed to retrieve table: " + response.ReasonPhrase);
+            Console.WriteLine($"Requesting table: {path}.php?db={(int)info.Id}&cate={info.Category}&t_doc={info.Category}");
 
-        var content = await response.Content.ReadAsStringAsync();
-        var document = new HtmlDocument();
-        document.LoadHtml(content);
+            var response = await _client.SendAsync(message);
+            if (!response.IsSuccessStatusCode)
+                throw new RiroApiException("Failed to retrieve table: " + response.ReasonPhrase);
 
-        var rdBoard = document.DocumentNode.SelectSingleNode("//div[@class='rd_board']");
-        var table = rdBoard?.SelectSingleNode(".//table")
-                    ?? throw new RiroApiException("Table not found in the response.");
+            var content = await response.Content.ReadAsStringAsync();
+            var document = new HtmlDocument();
+            document.LoadHtml(content);
 
-        var rows = table.SelectNodes(".//tr")
-                   ?? throw new RiroApiException("No data found in the table.");
+            var rdBoard = document.DocumentNode.SelectSingleNode("//div[@class='rd_board']");
+            var table = rdBoard?.SelectSingleNode(".//table")
+                        ?? throw new RiroApiException("Table not found in the response.");
 
-        if (rows.Count < 2)
-            throw new RiroApiException("Table must contain header and at least one data row.");
+            var rows = table.SelectNodes(".//tr")
+                       ?? throw new RiroApiException("No data found in the table.");
 
-        var list = new RiroTableList<T>(rows);
+            if (rows.Count < 2)
+                throw new RiroApiException("Table must contain header and at least one data row.");
+
+            list.Append(rows.Skip(1));
+        }
 
         if (list.Count == 0)
             throw new RiroApiException("No data found.");
