@@ -1,8 +1,8 @@
 ﻿using System.Net.Http.Headers;
 using System.Reflection;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using EasyRiroSchool.API.Exceptions;
-using EasyRiroSchool.Deserialization;
 using EasyRiroSchool.Models;
 using EasyRiroSchool.Models.Authentication;
 using EasyRiroSchool.Models.Deserialization;
@@ -18,8 +18,7 @@ public class RiroSchool
 {
     static RiroSchool()
     {
-        var riroItemTypes = typeof(RiroSchool).Assembly.GetTypes().Where(t => t.IsClass && !t.IsAbstract &&
-                                                                              t.IsSubclassOf(typeof(RiroItem)));
+        var riroItemTypes = typeof(RiroSchool).Assembly.GetTypes().Where(t => t is { IsClass: true, IsAbstract: false } && t.IsSubclassOf(typeof(RiroItem)));
 
         foreach (var type in riroItemTypes)
         {
@@ -41,6 +40,10 @@ public class RiroSchool
     }
 
     private static readonly Dictionary<Type, RiroItemAttribute> _itemTypes = new();
+    private static readonly JsonSerializerOptions _jsonOptions = new()
+    {
+        NumberHandling = JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.WriteAsString,
+    };
 
     public string Token { get; private set; }
 
@@ -80,7 +83,7 @@ public class RiroSchool
                                          "Login request failed with code " + response.StatusCode);
 
         var content = await response.Content.ReadAsStringAsync();
-        var loginResponse = JsonSerializer.Deserialize<LoginResponse>(content);
+        var loginResponse = JsonSerializer.Deserialize<LoginResponse>(content, _jsonOptions);
 
         if (loginResponse == null) throw new RiroLoginException("Login response is null.");
 
@@ -142,6 +145,38 @@ public class RiroSchool
             throw new RiroApiException("No data found.");
 
         return list;
+    }
+
+    public async Task<RiroCalendar> GetCalendarAsync(int year, int month)
+    {
+        if (string.IsNullOrEmpty(Token))
+            throw new RiroApiException("You must login before accessing the API.");
+
+        var message = new HttpRequestMessage(HttpMethod.Get,
+            $"school_schedule.php?db=2301&year={year}&month={month}");
+        message.Headers.Add("Cookie", "cookie_token=" + Token);
+
+        var response = await _client.SendAsync(message);
+        if (!response.IsSuccessStatusCode)
+            throw new RiroApiException("Failed to retrieve calendar: " + response.ReasonPhrase);
+
+        var content = await response.Content.ReadAsStringAsync();
+        var document = new HtmlDocument();
+        document.LoadHtml(content);
+
+        var table = document.DocumentNode.SelectSingleNode("//table[@class='calendar_table']")
+                     ?? throw new RiroApiException("Calendar table not found in the response.");
+
+        var rows = table.SelectNodes(".//tr");
+
+        if (rows == null || rows.Count < 2)
+            throw new RiroApiException("Calendar table must contain header and at least one data row.");
+
+        var calendar = new RiroCalendar(rows.Skip(1));
+        if (calendar.Count == 0)
+            throw new RiroApiException("No calendar data found.");
+
+        return calendar;
     }
 
     // public async Task<RiroTableList<BoardItem>> GetBoardMessageAsync(DbInfo info)

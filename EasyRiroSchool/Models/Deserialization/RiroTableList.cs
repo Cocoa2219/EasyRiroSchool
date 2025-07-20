@@ -4,7 +4,7 @@ using EasyRiroSchool.Models.Deserialization;
 using EasyRiroSchool.Models.Deserialization.Items;
 using HtmlAgilityPack;
 
-namespace EasyRiroSchool.Deserialization;
+namespace EasyRiroSchool.Models.Deserialization;
 
 /// <summary>
 /// Represents a list of table items deserialized from an HTML table.

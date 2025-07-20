@@ -99,7 +99,7 @@ public partial class BoardItem : RiroItem
     [RiroTableItem(5)]
     public string? Author { get; internal set; }
     public object GetAuthor(HtmlNode node) =>
-        node.InnerText.Trim() ?? "Author not found";
+        node.InnerText.Trim();
 
     [RiroTableItem(6)]
     public int Views { get; internal set; }

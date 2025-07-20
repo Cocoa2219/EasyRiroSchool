@@ -1,116 +1,95 @@
 using EasyRiroSchool.API;
 using EasyRiroSchool.API.Exceptions;
 using EasyRiroSchool.Models;
-using EasyRiroSchool.Models.Deserialization;
 using EasyRiroSchool.Models.Deserialization.Items;
 
 namespace EasyRiroSchool.Test;
 
-public class LoginTests
+public class UnitTest1
 {
+    private RiroSchool _riroschool;
+
     [SetUp]
     public void Setup()
     {
+        _riroschool = new RiroSchool();
+    }
+
+    private async Task LoginAsync(string email, string password)
+    {
+        await _riroschool.LoginAsync(email, password);
+        Assert.That(_riroschool.Token, Is.Not.Empty, "Token should not be empty after login.");
     }
 
     [Test]
-    public async Task LoginTest()
+    [TestCase("cocoa.2324a@gmail.com", "cocoa2219!")]
+    public async Task Login_WithValidCredentials_ShouldSucceed(string email, string password)
     {
-        var riroschool = new RiroSchool();
-
-        try
-        {
-            await riroschool.LoginAsync("cocoa.2324a@gmail.com", "cocoa2219!");
-
-            Assert.That(riroschool.Token, Is.Not.Empty, "Token should not be empty after login.");
-            Console.WriteLine($"Login successful. Token: {riroschool.Token}");
-        }
-        catch (Exception e)
-        {
-            Assert.Fail("Login failed: " + e.Message);
-        }
+        await LoginAsync(email, password);
     }
 
     [Test]
-    public async Task LoginTestWithInvalidCredentials()
+    [TestCase("invalid_user", "invalid_password")]
+    public async Task Login_WithInvalidCredentials_ShouldFail(string email, string password)
     {
-        var riroschool = new RiroSchool();
+        var ex = Assert.ThrowsAsync<RiroLoginException>(() => _riroschool.LoginAsync(email, password));
+        Assert.That(ex?.Message, Is.Not.Empty, "Exception message should not be empty.");
+    }
 
-        try
-        {
-            await riroschool.LoginAsync("invalid_user", "invalid_password");
-            Assert.Fail("Login should have failed with invalid credentials.");
-        }
-        catch (RiroLoginException e)
-        {
-            Assert.That(e.Message, Is.Not.Empty, "Exception message should not be empty.");
-            Console.WriteLine($"Expected failure: {e.Message}");
-        }
+    private static IEnumerable<TestCaseData> GetTableTestCases()
+    {
+        yield return new TestCaseData(
+            new DbInfo(DbId.CurricularActivity),
+            typeof(PortfolioItem)
+        ).SetName("GetPortfolio_ShouldSucceed");
+
+        yield return new TestCaseData(
+            new DbInfo(DbId.Announcement),
+            typeof(BoardItem)
+        ).SetName("GetBoard_ShouldSucceed");
+
+        yield return new TestCaseData(
+            new DbInfo(DbId.MealApplication),
+            typeof(MealApplicationItem)
+        ).SetName("GetMealApplication_ShouldSucceed");
     }
 
     [Test]
-    public async Task GetPortfolio()
+    [TestCaseSource(nameof(GetTableTestCases))]
+    public async Task GetTable_GenericTest(DbInfo dbInfo, Type itemType)
     {
-        var riroschool = new RiroSchool();
+        await LoginAsync("cocoa.2324a@gmail.com", "cocoa2219!");
 
-        try
-        {
-            await riroschool.LoginAsync("cocoa.2324a@gmail.com", "cocoa2219!");
+        var method = typeof(RiroSchool)
+            .GetMethod(nameof(RiroSchool.GetTableAsync))!
+            .MakeGenericMethod(itemType);
 
-            Assert.That(riroschool.Token, Is.Not.Empty, "Token should not be empty after login.");
-            Console.WriteLine($"Login successful. Token: {riroschool.Token}");
-        }
-        catch (Exception e)
-        {
-            Assert.Fail("Login failed: " + e.Message);
-        }
+        var task = (Task)method.Invoke(_riroschool, [dbInfo])!;
+        await task.ConfigureAwait(false);
 
-        try
-        {
-            var portfolioList = await riroschool.GetTableAsync<PortfolioItem>(new DbInfo(DbId.CurricularActivity));
-            Assert.That(portfolioList, Is.Not.Null, "Portfolio should not be null.");
+        var resultProperty = task.GetType().GetProperty("Result")!;
+        var result = (IEnumerable<object>)resultProperty.GetValue(task)!;
 
-            foreach (var item in portfolioList)
-            {
-                Console.WriteLine(item.ToString());
-            }
-        }
-        catch (RiroApiException e)
+        Assert.That(result, Is.Not.Null.And.Not.Empty, $"Table data for {itemType.Name} should not be null or empty.");
+
+        foreach (var item in result)
         {
-            Assert.Fail("Failed to retrieve portfolio: " + e.Message);
+            Console.WriteLine(item);
         }
     }
 
     [Test]
-    public async Task GetBoard()
+    public async Task GetCalendar_ShouldSucceed()
     {
-        var riroschool = new RiroSchool();
+        await LoginAsync("cocoa.2324a@gmail.com", "cocoa2219!");
 
-        try
-        {
-            await riroschool.LoginAsync("cocoa.2324a@gmail.com", "cocoa2219!");
+        var calendar = await _riroschool.GetCalendarAsync(2025, 7);
+        Assert.That(calendar, Is.Not.Null, "Calendar should not be null.");
+        Assert.That(calendar, Is.Not.Empty, "Calendar should contain items.");
 
-            Assert.That(riroschool.Token, Is.Not.Empty, "Token should not be empty after login.");
-            Console.WriteLine($"Login successful. Token: {riroschool.Token}");
-        }
-        catch (Exception e)
+        foreach (var item in calendar)
         {
-            Assert.Fail("Login failed: " + e.Message);
-        }
-
-        try
-        {
-            var boardList = await riroschool.GetTableAsync<BoardItem>(new DbInfo(DbId.Announcement, count: 41));
-            Assert.That(boardList, Is.Not.Null, "Board should not be null.");
-
-            foreach (var item in boardList)
-            {
-                Console.WriteLine(item.ToString());
-            }
-        }
-        catch (RiroApiException e)
-        {
-            Assert.Fail("Failed to retrieve board: " + e.Message);
+            Console.WriteLine($"Date: {item.Date}, Events: {string.Join(", ", item.Events)}, IsHoliday: {item.IsHoliday}");
         }
     }
 }
